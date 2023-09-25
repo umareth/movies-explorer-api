@@ -54,7 +54,7 @@ const deleteMovie = async (req, res, next) => {
       throw new NotFoundErr(ERROR_NOT_FOUND);
     }
     // Возвращаем успешный статус и сообщение
-    return res.status(STATUS_OK).send(SUCCESS_DEL);
+    return res.status(STATUS_OK).send({ message: SUCCESS_DEL });
   } catch (err) {
     if (err.name === 'CastError') {
       return next(new NotFoundErr(ERROR_INCORRECT_DATA));
