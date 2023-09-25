@@ -1,7 +1,8 @@
 # movies-explorer-api
-# backend project
+Backend Project
 
-### API для аутентификации пользователей и сохранения фильмов
-### URL: api.shakh.movies.nomoredomainsrocks.ru
+## Overview
+This is the backend API for user authentication and movie storage for the Movies Explorer project.
 
-### IP: 158.160.108.212
+- **API URL**: [api.shakh.movies.nomoredomainsrocks.ru](https://api.shakh.movies.nomoredomainsrocks.ru)
+- **IP Address**: 158.160.108.212
