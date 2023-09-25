@@ -6,8 +6,8 @@ const {
 } = process.env;
 
 const allowedCors = [
-  'http://shakh.eth.nomoredomainsicu.ru',
-  'https://shakh.eth.nomoredomainsicu.ru',
+  'http://shakh.movies.nomoredomainsrocks.ru',
+  'https://shakh.movies.nomoredomainsrocks.ru',
   'http://localhost:3000',
   'https://localhost:3000',
 ];
