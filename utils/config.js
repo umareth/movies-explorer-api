@@ -25,8 +25,11 @@ const DEFAULT_ALLOWED_METHODS = "GET,HEAD,PUT,PATCH,POST,DELETE";
 
 // Массив доменов, с которых разрешены кросс-доменные запросы
 const ALLOWED_CORS = [
-  "https://shakh.movies.nomoredomainsrocks.ru/",
-  "http://shakh.movies.nomoredomainsrocks.ru/",
+  "https://shakh.movies.nomoredomainsrocks.ru",
+  "http://shakh.movies.nomoredomainsrocks.ru",
+  "https://shakh.movies.nomoredomainsrocks.ru/me",
+  "https://shakh.movies.nomoredomainsrocks.ru/movies",
+  "https://shakh.movies.nomoredomainsrocks.ru/profile",
   "https://localhost:3001",
   "http://localhost:3001",
 ];
