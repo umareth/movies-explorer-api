@@ -1,4 +1,4 @@
-const Movie = require('../models/movie');
+const Movie = require("../models/movie");
 const {
   STATUS_OK,
   ERROR_INCORRECT_DATA,
@@ -6,12 +6,12 @@ const {
   ERROR_NOT_ACCESS,
   SUCCESS_DEL,
   STATUS_CREATED,
-} = require('../utils/constants');
-const BadRequestErr = require('../middlewares/errors/badReq');
-const NotFoundErr = require('../middlewares/errors/notFound');
-const ForbiddenErr = require('../middlewares/errors/errForbidden');
+} = require("../utils/constants");
+const BadRequestErr = require("../middlewares/errors/badReq");
+const NotFoundErr = require("../middlewares/errors/notFound");
+const ForbiddenErr = require("../middlewares/errors/errForbidden");
 
-// Получить все фильмы пользователя
+// Получить все фильмы пользователя для проверки гита
 const getMovies = (req, res, next) => {
   Movie.find({ owner: req.user.id })
     .then((movies) => res.status(STATUS_OK).json(movies))
@@ -28,7 +28,7 @@ const createMovie = (req, res, next) => {
   Movie.create(movieData)
     .then((newMovie) => res.status(STATUS_CREATED).send(newMovie))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === "ValidationError") {
         return next(new BadRequestErr(ERROR_INCORRECT_DATA));
       }
       return next(err); // Вернуть значение из catch блока
@@ -56,7 +56,7 @@ const deleteMovie = async (req, res, next) => {
     // Возвращаем успешный статус и сообщение
     return res.status(STATUS_OK).send({ message: SUCCESS_DEL });
   } catch (err) {
-    if (err.name === 'CastError') {
+    if (err.name === "CastError") {
       return next(new NotFoundErr(ERROR_INCORRECT_DATA));
     }
     return next(err);
