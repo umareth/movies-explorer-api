@@ -1,23 +1,40 @@
+// Импорт пакетов
 const router = require('express').Router();
 
-const validate = require('../utils/validate');
-const { login, createUser, logOut } = require('../controllers/users'); // контроллеры
-const { auth } = require('../middlewares/auth');
-const NotFoundErr = require('../middlewares/errors/notFound');
-const { ERROR_NOT_FOUND_ROUTE } = require('../utils/constants');
+// Импорт добавленных ошибок
+const NotFoundError = require('../errors/not-found-err'); // ошибка поиска
 
-router.post('/signup', validate.validateCreateUser, createUser);
-router.post('/signin', validate.validateLoginUser, login);
+// Импорт самописных данных
+const { validateUserAuth, validateUserCreate } = require('../utils/validate'); // схемы валидации
+const { login, createUser, logout } = require('../controllers/users'); // контроллеры
+const { auth } = require('../middlewares/auth'); // проверка авторизации
+const { MESSAGE_NOT_FOUND } = require('../utils/constants');
 
+// Запросы на авторизацию и регистрацию
+router.post(
+  '/signin',
+  validateUserAuth,
+  login,
+);
+router.post(
+  '/signup',
+  validateUserCreate,
+  createUser,
+);
+
+// Проверка авторизации
 router.use(auth);
 
+// Запросы к серверу по роутам users и movies
 router.use('/users', require('./users'));
 router.use('/movies', require('./movies'));
 
-router.use('/signout', logOut);
+// Запрос на выход
+router.use('/signout', logout);
 
+// .оповещение об ошибке по несуществующим роутам
 router.use('*', (req, res, next) => {
-  next(new NotFoundErr(ERROR_NOT_FOUND_ROUTE));
+  next(new NotFoundError(MESSAGE_NOT_FOUND));
 });
 
 module.exports = router;

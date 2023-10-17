@@ -1,22 +1,28 @@
-const { DEFAULT_ALLOWED_METHODS, allowedCors } = require('../utils/config');
+// Импорт параметров
+const { DEFAULT_ALLOWED_METHODS, ALLOWED_CORS } = require('../utils/config');
 
 module.exports = (req, res, next) => {
-  const { origin } = req.headers;
-  const { method } = req;
-  const requestHeaders = req.headers['access-control-request-headers'];
+  const { origin } = req.headers; // Сохраняем источник запроса в переменную origin
+  const { method } = req; // Сохраняем тип запроса (HTTP-метод) в соответствующую переменную
 
-  // Если источник запроса разрешен, устанавливаем заголовок Access-Control-Allow-Origin
-  if (allowedCors.includes(origin)) {
+  // проверяем, что источник запроса есть среди разрешённых
+  if (ALLOWED_CORS.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
   }
 
-  // Если метод запроса - OPTIONS, устанавливаем заголовки CORS и завершаем ответ
+  res.header('Access-Control-Allow-Credentials', true);
+
+  // сохраняем список заголовков исходного запроса
+  const requestHeaders = req.headers['access-control-request-headers'];
+  // Если это предварительный запрос, добавляем нужные заголовки
   if (method === 'OPTIONS') {
+    // разрешаем кросс-доменные запросы любых типов (по умолчанию)
     res.header('Access-Control-Allow-Methods', DEFAULT_ALLOWED_METHODS);
+    // разрешаем кросс-доменные запросы с этими заголовками
     res.header('Access-Control-Allow-Headers', requestHeaders);
-    res.header('Access-Control-Allow-Credentials', true);
-    res.status(204).end(); // 204 No Content
-  } else {
-    next();
+    // завершаем обработку запроса и возвращаем результат клиенту
+    return res.end();
   }
+
+  return next();
 };

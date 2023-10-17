@@ -1,70 +1,51 @@
-const Movie = require("../models/movie");
-const {
-  STATUS_OK,
-  ERROR_INCORRECT_DATA,
-  ERROR_NOT_FOUND,
-  ERROR_NOT_ACCESS,
-  SUCCESS_DEL,
-  STATUS_CREATED,
-} = require("../utils/constants");
-const BadRequestErr = require("../middlewares/errors/badReq");
-const NotFoundErr = require("../middlewares/errors/notFound");
-const ForbiddenErr = require("../middlewares/errors/errForbidden");
+// Импорт пакетов
+const mongoose = require('mongoose');
 
-// Получить все фильмы пользователя для проверки гита
-const getMovies = (req, res, next) => {
-  Movie.find({ owner: req.user.id })
-    .then((movies) => res.status(STATUS_OK).json(movies))
+const { ValidationError } = mongoose.Error; // импорт ошибки валидации базы данных
+const {
+  STATUS_OK, MESSAGE_INCORRECT_DATA, MESSAGE_NOT_FOUND, MESSAGE_CONFIRMATION, MESSAGE_NOT_ACCESS,
+} = require('../utils/constants'); // импорт констант
+const Movie = require('../models/movie'); // импорт схемы БД фильмов
+
+// Импорт дописанных ошибок
+const NotFoundError = require('../errors/not-found-err'); // ошибка поиска
+const IncorrectData = require('../errors/incorrect-data'); // ошибка корректности данных
+const NotAccess = require('../errors/not-access'); // ошибка доступа к чужим данным
+
+// Контроллер запроса сохраненных фильмов пользователем
+module.exports.getMovies = (req, res, next) => {
+  const { _id } = req.user;
+  Movie.find({ owner: _id })
+    .then((movies) => res.send(movies))
     .catch(next);
 };
 
-// Создать новый фильм
-const createMovie = (req, res, next) => {
-  const movieData = {
-    owner: req.user.id,
-    ...req.body,
-  };
-
-  Movie.create(movieData)
-    .then((newMovie) => res.status(STATUS_CREATED).send(newMovie))
+// Контроллер сохранения фильма в избранное
+module.exports.createMovie = (req, res, next) => {
+  const { _id } = req.user;
+  Movie.create({ owner: _id, ...req.body })
+    .then((movie) => res.status(STATUS_OK).send(movie))
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return next(new BadRequestErr(ERROR_INCORRECT_DATA));
+      if (err instanceof ValidationError) {
+        next(new IncorrectData(MESSAGE_INCORRECT_DATA));
+      } else {
+        next(err);
       }
-      return next(err); // Вернуть значение из catch блока
     });
 };
 
-const deleteMovie = async (req, res, next) => {
-  try {
-    const { _id } = req.params;
-    // Находим фильм
-    const movie = await Movie.findById(_id);
-    // Проверяем, существует ли фильм
-    if (!movie) {
-      throw new NotFoundErr(ERROR_NOT_FOUND);
-    }
-    // Проверяем права доступа текущего пользователя на удаление фильма
-    if (movie.owner.toString() !== req.user.id) {
-      throw new ForbiddenErr(ERROR_NOT_ACCESS);
-    }
-    // Удаляем фильм
-    const deletedMovie = await Movie.findByIdAndRemove(_id);
-    if (!deletedMovie) {
-      throw new NotFoundErr(ERROR_NOT_FOUND);
-    }
-    // Возвращаем успешный статус и сообщение
-    return res.status(STATUS_OK).send({ message: SUCCESS_DEL });
-  } catch (err) {
-    if (err.name === "CastError") {
-      return next(new NotFoundErr(ERROR_INCORRECT_DATA));
-    }
-    return next(err);
-  }
-};
-
-module.exports = {
-  getMovies,
-  createMovie,
-  deleteMovie,
+// Контроллер удаления фильма из избранного
+module.exports.deleteMovie = (req, res, next) => {
+  const { movieId } = req.params;
+  const { _id } = req.user;
+  Movie.findById(movieId)
+    .orFail(new NotFoundError(MESSAGE_NOT_FOUND))
+    .then((movie) => {
+      if (movie.owner.toString() !== _id) {
+        return Promise.reject(new NotAccess(MESSAGE_NOT_ACCESS));
+      }
+      return Movie.deleteOne(movie)
+        .then(() => res.send({ message: MESSAGE_CONFIRMATION }));
+    })
+    .catch(next);
 };

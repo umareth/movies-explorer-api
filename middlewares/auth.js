@@ -1,33 +1,28 @@
+// Импорт пакетов
 const jwt = require('jsonwebtoken');
-const Unauthorized = require('./errors/errAuth');
 
-const { NODE_ENV, JWT_SECRET } = require('../utils/config');
-const {
-  ERROR_AUTH_REQUIRED,
-} = require('../utils/constants');
+// Импорт параметров
+const { JWT_SECRET } = require('../utils/config');
+const NotFoundAuth = require('../errors/not-found-auth'); // ошибка поиска
+const { MESSAGE_NEED_AUTH } = require('../utils/constants'); // импорт констант
 
-const auth = (req, res, next) => {
-  const { authorization } = req.headers;
+// Вспомогательная функция для ответа
+const handleAuthError = (req, res, next) => next(new NotFoundAuth(MESSAGE_NEED_AUTH));
 
-  if (!authorization || !authorization.startsWith('Bearer')) {
-    throw new Unauthorized(ERROR_AUTH_REQUIRED);
-  }
-
-  const token = authorization.replace('Bearer ', '');
+// Проверка авторизации
+module.exports.auth = (req, res, next) => {
+  const { token } = req.cookies;
   let payload;
 
   try {
-    payload = jwt.verify(token, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key');
+    if (!token) {
+      return handleAuthError(req, res, next);
+    }
+    payload = jwt.verify(token, JWT_SECRET);
   } catch (err) {
-    next(new Unauthorized(err));
-    return;
+    return handleAuthError(req, res, next);
   }
 
-  req.user = payload; // записываем пейлоуд в объект запроса
-
-  next(); // пропускаем запрос дальше
-};
-
-module.exports = {
-  auth,
+  req.user = payload; // записать пейлоуд в объект запроса
+  return next(); // пропустить запрос дальше
 };

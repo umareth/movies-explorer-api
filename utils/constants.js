@@ -1,58 +1,56 @@
-const REGEX = /^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/;
-
+// Числовые константы
+const STATUS_OK = 201;
+const ERROR_INCORRECT_DATA = 400;
+const ERROR_AUTH = 401;
+const ERROR_ACCESS = 403;
+const ERROR_NOT_FOUND = 404;
+const ERROR_NOT_UNIQUE = 409;
+const ERROR_DEFAULT = 500;
+const ERROR_CODE_UNIQUE = 11000;
+const MAX_AGE_COOKIE = 3600000 * 24 * 7;
 const SALT_ROUNDS_HASH = 10;
+const MIN_LENGTH_WORD = 2;
+const MAX_LENGTH_WORD = 30;
+const MAX_REQUESTS = 100;
+const TIME_LIMIT_WINDOW = 15 * 60 * 1000;
+const LENGTH_ID = 24;
 
-const DEFAULT_ALLOWED_METHODS = 'GET,HEAD,PUT,PATCH,POST,DELETE';
-
-const SUCCESS_LOGOUT = 'Успешно произведен выход';
-const SUCCESS_AUTH = 'Успешно произведен вход';
-const SUCCESS_DEL = 'Фильм успешно удален';
-
-const ERROR_INCORRECT_DATA = 'Ошибка: Переданы некорректные данные';
-const ERROR_NOT_FOUND = 'Ошибка: Запрашиваемые данные не найдены';
-const ERROR_NOT_ACCESS = 'Ошибка: У вас нет доступа к данным другого пользователя';
-const ERROR_CONFIRMATION_REQUIRED = 'Ошибка: Требуется подтверждение';
-const ERROR_DUPLICATE_ENTRY = 'Ошибка: Пользователь с такой почтой уже существует';
-const ERROR_VALIDATION = 'Ошибка валидации данных';
-const ERROR_AUTH_REQUIRED = 'Ошибка: Требуется авторизация';
-const ERROR_DEFAULT = 'Произошла неизвестная ошибка';
-const ERROR_INVALID_URL = 'Ошибка: Некорректный URL';
-const ERROR_AUTHENTICATION = 'Ошибка аутентификации';
-const ERROR_NOT_FOUND_ROUTE = 'Ошибка: проверьте правильность пути роутера';
-
-const STATUS_OK = 200;
-const STATUS_CREATED = 201;
-const STATUS_BAD_REQUEST = 400;
-const STATUS_UNAUTHORIZED = 401;
-const STATUS_FORBIDDEN = 403;
-const STATUS_NOT_FOUND = 404;
-const STATUS_CONFLICT = 409;
-const STATUS_INTERNAL_SERVER = 500;
+// Текстовые константы
+const MESSAGE_INCORRECT_DATA = 'Переданы некорректные данные';
+const MESSAGE_NOT_FOUND = 'Запрашиваемые данные не найдены';
+const MESSAGE_NOT_ACCESS = 'Нельзя удалять чужие данные';
+const MESSAGE_CONFIRMATION = 'Действие успешно выполнено';
+const MESSAGE_UNIQUE = 'Пользователь с такой почтой уже зарегистрирован';
+const MESSAGE_VALIDATION = 'Данные введены в неверном формате';
+const MESSAGE_NEED_AUTH = 'Необходима авторизация';
+const MESSAGE_DEFAULT = 'На сервере произошла ошибка';
+const MESSAGE_VALIDATION_URL = 'Введен некорректный адрес url';
+const MESSAGE_ERROR_AUTH = 'Неправильные почта или пароль';
 
 module.exports = {
-  REGEX,
-  SUCCESS_LOGOUT,
-  DEFAULT_ALLOWED_METHODS,
-  STATUS_OK,
-  STATUS_BAD_REQUEST,
-  STATUS_UNAUTHORIZED,
-  STATUS_FORBIDDEN,
-  STATUS_NOT_FOUND,
-  STATUS_CONFLICT,
-  STATUS_INTERNAL_SERVER,
   ERROR_INCORRECT_DATA,
   ERROR_NOT_FOUND,
-  ERROR_NOT_ACCESS,
-  ERROR_CONFIRMATION_REQUIRED,
-  ERROR_DUPLICATE_ENTRY,
-  ERROR_VALIDATION,
-  ERROR_AUTH_REQUIRED,
   ERROR_DEFAULT,
-  ERROR_INVALID_URL,
-  ERROR_AUTHENTICATION,
+  STATUS_OK,
+  ERROR_NOT_UNIQUE,
+  ERROR_AUTH,
+  ERROR_ACCESS,
+  ERROR_CODE_UNIQUE,
+  MAX_AGE_COOKIE,
   SALT_ROUNDS_HASH,
-  SUCCESS_AUTH,
-  SUCCESS_DEL,
-  STATUS_CREATED,
-  ERROR_NOT_FOUND_ROUTE,
+  MIN_LENGTH_WORD,
+  MAX_LENGTH_WORD,
+  MAX_REQUESTS,
+  TIME_LIMIT_WINDOW,
+  LENGTH_ID,
+  MESSAGE_INCORRECT_DATA,
+  MESSAGE_NOT_FOUND,
+  MESSAGE_NOT_ACCESS,
+  MESSAGE_CONFIRMATION,
+  MESSAGE_UNIQUE,
+  MESSAGE_VALIDATION,
+  MESSAGE_NEED_AUTH,
+  MESSAGE_DEFAULT,
+  MESSAGE_VALIDATION_URL,
+  MESSAGE_ERROR_AUTH,
 };
