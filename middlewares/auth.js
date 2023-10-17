@@ -12,7 +12,7 @@ const handleAuthError = (req, res, next) =>
 
 // Проверка авторизации
 module.exports.auth = (req, res, next) => {
-  const { token } = res.cookies;
+  const { token } = req.cookies;
   let payload;
 
   try {
