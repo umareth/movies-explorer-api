@@ -25,16 +25,16 @@ const DEFAULT_ALLOWED_METHODS = "GET,HEAD,PUT,PATCH,POST,DELETE";
 
 // Массив доменов, с которых разрешены кросс-доменные запросы
 const ALLOWED_CORS = [
-  "http://api.shakh.movies.nomoredomainsrocks.ru",
   "https://api.shakh.movies.nomoredomainsrocks.ru",
-  "http://localhost:3001",
+  "http://api.shakh.movies.nomoredomainsrocks.ru",
   "https://localhost:3001",
+  "http://localhost:3001",
 ];
 
 // Регулярные выражения
 const REGEX = /^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/;
 const REGEX_MOVIE =
-  /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|rutube\.ru)\/(.+)$/;
+  /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be|vimeo\.com|kinopoisk\.ru)\/(.+)$/;
 
 module.exports = {
   PORT,
