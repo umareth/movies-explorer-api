@@ -1,12 +1,14 @@
-// Импорт пакетов
 const router = require('express').Router();
+const validate = require('../utils/validate');
 
-// Импорт самописных данных
-const { validateMovie, validateMovieID } = require('../utils/validate'); // схем валидации
-const { getMovies, deleteMovie, createMovie } = require('../controllers/movies'); // контроллеры
+const {
+  getMovies,
+  createMovie,
+  deleteMovie,
+} = require('../controllers/movies');
 
-router.get('/', getMovies); // запросить фильмы
-router.post('/', validateMovie, createMovie); // создать фильм (добавить в избранное)
-router.delete('/:movieId', validateMovieID, deleteMovie); // удалить фильмы (удалить из избранного)
+router.get('/', getMovies);
+router.post('/', validate.validateCreateMovie, createMovie);
+router.delete('/:_id', validate.validateGetMovieId, deleteMovie);
 
 module.exports = router;

@@ -1,111 +1,131 @@
-// Импорт пакетов
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
+const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
+const jwt = require('jsonwebtoken');
 
-const { ValidationError } = mongoose.Error; // импорт ошибки валидации базы данных
-const { JWT_SECRET, NODE_ENV } = require("../utils/config"); // импорт параметров
+const { NODE_ENV, JWT_SECRET } = require('../utils/config');
+
+const { ValidationError } = mongoose.Error;
+
 const {
-  STATUS_OK,
-  ERROR_CODE_UNIQUE,
-  MAX_AGE_COOKIE,
+  SUCCESS_LOGOUT,
   SALT_ROUNDS_HASH,
-  MESSAGE_INCORRECT_DATA,
-  MESSAGE_UNIQUE,
-  MESSAGE_CONFIRMATION,
-  MESSAGE_NOT_FOUND,
-  MESSAGE_VALIDATION,
-} = require("../utils/constants"); // импорт констант
-const User = require("../models/user"); // импорт схемы БД пользователь
+  ERROR_DUPLICATE_ENTRY,
+  ERROR_INCORRECT_DATA,
+  STATUS_OK,
+  ERROR_AUTHENTICATION,
+  ERROR_NOT_FOUND,
+  STATUS_CREATED,
+} = require('../utils/constants');
 
-// Импорт дописанных ошибок
-const IncorrectData = require("../errors/incorrect-data"); // ошибка корректности данных
-const NotUniqueData = require("../errors/unique-data"); // ошибка уникальности данных
-const NotFoundError = require("../errors/not-found-err"); // ошибка поиска
+const User = require('../models/user');
 
-// Контроллер запроса создания пользоваетля
-module.exports.createUser = (req, res, next) => {
-  const { name, email, password } = req.body;
-  bcrypt
-    .hash(password, SALT_ROUNDS_HASH)
-    .then((hash) =>
-      User.create({
-        name,
-        email,
-        password: hash,
-      })
-    )
-    .then((user) => res.status(STATUS_OK).send(user.toJSON()))
-    .catch((err) => {
-      if (err.code === ERROR_CODE_UNIQUE) {
-        next(new NotUniqueData(MESSAGE_UNIQUE));
-      } else if (err instanceof ValidationError) {
-        next(new IncorrectData(MESSAGE_INCORRECT_DATA));
-      } else {
-        next(err);
-      }
-    });
+const NotFoundErr = require('../middlewares/errors/notFound');
+const BadRequestErr = require('../middlewares/errors/badReq');
+const ConflictErr = require('../middlewares/errors/confErr');
+const UnauthorizedError = require('../middlewares/errors/errAuth');
+
+const generateToken = (id) => jwt.sign({ id }, NODE_ENV === 'production' ? JWT_SECRET : 'some-secret-key');
+
+const createUser = async (req, res, next) => {
+  try {
+    const { name, email, password } = req.body;
+    const hash = await bcrypt.hash(password, SALT_ROUNDS_HASH);
+    const user = await User.create({ name, email, password: hash });
+    const userWithoutPassword = user.toJSON();
+    delete userWithoutPassword.password;
+    res.status(STATUS_CREATED).send(userWithoutPassword);
+  } catch (err) {
+    if (err.code === 11000) {
+      next(new ConflictErr(ERROR_DUPLICATE_ENTRY));
+    } else if (err instanceof ValidationError) {
+      next(new BadRequestErr(ERROR_INCORRECT_DATA));
+    } else {
+      next(err);
+    }
+  }
 };
 
-// Контроллер запроса входа пользователя
-module.exports.login = (req, res, next) => {
-  const { email, password } = req.body;
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email }).select('+password');
 
-  User.findUserByCredentials(email, password)
-    .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: "7d",
-      });
-      res
-        .cookie("token", token, {
-          maxAge: MAX_AGE_COOKIE,
-          httpOnly: true,
-          sameSite: "none",
-          secure: NODE_ENV === "production",
-        })
-        .send({ message: MESSAGE_CONFIRMATION });
-      return token;
-    })
-    .catch(next);
+    if (!user) {
+      throw new UnauthorizedError(ERROR_AUTHENTICATION);
+    }
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordMatch) {
+      throw new UnauthorizedError(ERROR_AUTHENTICATION);
+    }
+
+    const token = generateToken(user._id);
+    const cookieOptions = {
+      maxAge: 6048000,
+      httpOnly: true,
+      sameSite: true,
+    };
+
+    res.cookie('jwt', token, cookieOptions);
+    res.status(STATUS_OK).send({ token });
+  } catch (err) {
+    next(err);
+  }
 };
 
-// Контроллек запроса выхода пользователя
-module.exports.logout = (req, res) => {
-  res.clearCookie("token").send({ message: MESSAGE_CONFIRMATION });
+const getCurrentUser = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      throw new NotFoundErr(ERROR_NOT_FOUND);
+    }
+
+    return res.status(STATUS_OK).send(user);
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return next(new BadRequestErr(ERROR_INCORRECT_DATA));
+    }
+    return next(err);
+  }
 };
 
-// Вспомогательная функция по поиску в БД по id
-const findById = (req, res, next, id) => {
-  User.findById(id)
-    .orFail(new NotFoundError(MESSAGE_NOT_FOUND))
-    .then((user) => res.send(user))
-    .catch(next);
+const updateUser = async (req, res, next) => {
+  try {
+    const { email, name } = req.body;
+    const updatedProfile = await User.findByIdAndUpdate(
+      req.user.id,
+      { email, name },
+      { new: true, runValidators: true },
+    );
+
+    return res.status(STATUS_OK).send(updatedProfile);
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      return next(new BadRequestErr(ERROR_INCORRECT_DATA));
+    }
+    if (err.code === 11000) {
+      return next(new ConflictErr(ERROR_DUPLICATE_ENTRY));
+    }
+
+    return next(err);
+  }
 };
 
-// Контроллер запроса действующего пользователя
-module.exports.getCurrentUser = (req, res, next) => {
-  const { _id } = req.user;
-  findById(req, res, next, _id);
+const logOut = (req, res, next) => {
+  try {
+    res.clearCookie('jwt');
+    res.status(STATUS_OK).send({ message: SUCCESS_LOGOUT });
+  } catch (error) {
+    next(error);
+  }
 };
 
-// Вспомогательная функция обновления данных пользователя
-const updateUserData = (req, res, next, param) => {
-  const { _id } = req.user;
-  User.findByIdAndUpdate(_id, param, { new: true, runValidators: true })
-    .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.code === ERROR_CODE_UNIQUE) {
-        next(new NotUniqueData(MESSAGE_UNIQUE));
-      } else if (err instanceof ValidationError) {
-        next(new ValidationError(MESSAGE_VALIDATION));
-      } else {
-        next(err);
-      }
-    });
-};
-
-// Контроллер запроса обновления данных пользователя
-module.exports.updateUserProfile = (req, res, next) => {
-  const { name, email } = req.body;
-  updateUserData(req, res, next, { name, email });
+module.exports = {
+  createUser,
+  login,
+  logOut,
+  updateUser,
+  getCurrentUser,
 };

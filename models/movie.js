@@ -1,73 +1,58 @@
-// Импорт пакетов
 const mongoose = require('mongoose');
-const validator = require('validator');
 
-// Импорт констант
-const { MESSAGE_VALIDATION_URL } = require('../utils/constants');
-
-// Определение схемы фильмов
-const cardSchema = new mongoose.Schema({
-  country: { // обязательное поле страна создания фильма: строка
+const movieSchema = new mongoose.Schema({
+  country: {
     type: String,
     required: true,
   },
-  director: { // обязательное поле режиссер фильма: строка
+  director: {
     type: String,
     required: true,
   },
-  duration: { // обязательное поле продолжительность фильма: строка
+  duration: {
     type: Number,
     required: true,
   },
-  year: { // обязательное поле год выпуска фильма: строка
+  year: {
     type: String,
     required: true,
   },
-  description: { // обязательное поле описание фильма: строка
+  description: {
     type: String,
     required: true,
   },
-  image: { // обязательное поле ссылка на постер к фильму: строка, URL-адрес
+  image: {
+    validate: /^https?:\/\/(www)?[0-9a-z\-._~:/?#[\]@!$&'()*+,;=]+#?$/i,
     type: String,
     required: true,
-    validate: {
-      validator: (v) => validator.isURL(v),
-      message: MESSAGE_VALIDATION_URL,
-    },
   },
-  trailerLink: { // обязательное поле ссылка на трейлер фильма: строка, URL-адрес
+  trailerLink: {
+    validate: /^https?:\/\/(www)?[0-9a-z\-._~:/?#[\]@!$&'()*+,;=]+#?$/i,
     type: String,
     required: true,
-    validate: {
-      validator: (v) => validator.isURL(v),
-      message: MESSAGE_VALIDATION_URL,
-    },
   },
-  thumbnail: { // обязательное поле миниатюрное изображение постера к фильму: строка, URL-адрес
+  thumbnail: {
+    validate: /^https?:\/\/(www)?[0-9a-z\-._~:/?#[\]@!$&'()*+,;=]+#?$/i,
     type: String,
     required: true,
-    validate: {
-      validator: (v) => validator.isURL(v),
-      message: MESSAGE_VALIDATION_URL,
-    },
   },
-  owner: { // обязательное поле _id пользователя, который сохранил фильм: из схемы потльзователя
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
     required: true,
   },
-  movieId: { // обязательное поле id фильма, из ответа сервиса MoviesExplorer: число
+  movieId: {
     type: Number,
     required: true,
   },
-  nameRU: { // обязательное поле название фильма на русском языке: строка
+  nameRU: {
     type: String,
     required: true,
   },
-  nameEN: { // обязательное поле название фильма на английском языке: строка
+  nameEN: {
     type: String,
     required: true,
   },
-}, { versionKey: false }); // убирает версирование
+});
 
-module.exports = mongoose.model('movie', cardSchema);
+module.exports = mongoose.model('movie', movieSchema);

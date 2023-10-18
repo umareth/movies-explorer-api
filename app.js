@@ -3,34 +3,32 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
 const { errors } = require('celebrate');
 
-// Импорты самописных данных
-const { PORT, MONGO, LIMITER } = require('./utils/config'); // параметры
-const responseError = require('./middlewares/response-error'); // общий обработчик ошибок
-const router = require('./routes'); // роуты
 const { requestLogger, errorLogger } = require('./middlewares/logger'); // логгеры ошибок и запросов
-const cors = require('./middlewares/cors'); // настройка cors
+const errorHandler = require('./middlewares/error-handler');
 
-// Создать приложение
+const { PORT, MONGO } = require('./utils/config'); // параметры
+const router = require('./routes');
+const cors = require('./middlewares/cors');
+const limiter = require('./utils/limiter');
+
 const app = express();
 
-app.use(cors); // разрешение кроссдоменных запросов
-app.use(express.json()); // обработка запросов json
-app.use(helmet()); // защита от веб-уязвимостей
-app.use(LIMITER); // ограничение запросов ко всем роутам
-app.use(cookieParser()); // для извлечения данных из куков
+app.use(cors);
+app.use(limiter);
+app.use(helmet());
+app.use(express.json());
 
-mongoose.connect(MONGO); // подключение к базе данных
+mongoose.connect(MONGO);
 
-app.use(requestLogger); // подключение логгера запросов
-app.use(router); // подключение роутов
-app.use(errorLogger); // подключение логгера ошибок
+app.use(requestLogger);
+app.use(router);
+app.use(errorLogger);
 
-// Обработчики ошибок(celebrate и централизованный)
 app.use(errors());
-app.use(responseError);
+app.use(errorHandler);
 
-// Прослушивание порта
-app.listen(PORT);
+app.listen(PORT, () => {
+  console.log(`Сервер запущен на порту ${PORT}`);
+});
