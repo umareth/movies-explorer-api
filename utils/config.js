@@ -6,10 +6,10 @@ const {
 } = process.env;
 
 const allowedCors = [
-  "http://shakheth.nomoredomainsrocks.ru",
   "https://shakheth.nomoredomainsrocks.ru",
-  "http://localhost:3001",
   "https://localhost:3001",
+  "http://shakheth.nomoredomainsrocks.ru",
+  "http://localhost:3001",
 ];
 
 module.exports = {
