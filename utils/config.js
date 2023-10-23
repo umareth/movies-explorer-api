@@ -7,9 +7,9 @@ const {
 
 const allowedCors = [
   "https://shakheth.nomoredomainsrocks.ru",
-  "https://localhost:3001",
+  "https://localhost:3000",
   "http://shakheth.nomoredomainsrocks.ru",
-  "http://localhost:3001",
+  "http://localhost:3000",
 ];
 
 module.exports = {
