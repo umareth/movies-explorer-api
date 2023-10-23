@@ -1,13 +1,7 @@
-const allowedCors = [
-  "http://shakh.nomoredomainsrocks.ru",
-  "https://shakh.nomoredomainsrocks.ru",
-  "http://localhost:3000",
-  "https://localhost:3000",
-  "http://localhost:3001",
-  "https://localhost:3001",
-];
+const { allowedCors } = require("../utils/config");
 
 const DEFAULT_ALLOWED_METHODS = "GET,HEAD,PUT,PATCH,POST,DELETE";
+
 const cors = (req, res, next) => {
   const { origin } = req.headers;
   const { method } = req;
