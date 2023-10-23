@@ -1,4 +1,4 @@
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi } = require("celebrate");
 
 // его можно использовать и для создания юзера
 const validateCreateUser = celebrate({
@@ -30,9 +30,17 @@ const validateCreateMovie = celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required().regex(/^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/),
-    trailerLink: Joi.string().required().regex(/^(https?:\/\/)?[^\s]*\.(mp4|avi|mov|mkv|flv|wmv|3gp)$/),
-    thumbnail: Joi.string().required().regex(/^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/),
+    image: Joi.string()
+      .required()
+      .regex(/^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/),
+    trailerLink: Joi.string()
+      .required()
+      .regex(
+        /^(https?:\/\/)?[^\s]*\.(mp4|avi|mov|mkv|flv|wmv|3gp|youtube\.com|youtu\.be)/
+      ),
+    thumbnail: Joi.string()
+      .required()
+      .regex(/^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/),
     movieId: Joi.number().required(),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
