@@ -1,4 +1,6 @@
-const Movie = require("../models/movie");
+const Movie = require("../models/restaurants");
+const MenuItem = require("../models/MenuItem");
+
 const {
   STATUS_OK,
   ERROR_INCORRECT_DATA,
@@ -63,8 +65,114 @@ const deleteMovie = async (req, res, next) => {
   }
 };
 
+// Получить все блюда для конкретного ресторана
+const getRestaurantMenuItems = async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+
+    // Проверяем существование ресторана
+    const restaurantExists = await Movie.findById(_id);
+    if (!restaurantExists) {
+      throw new NotFoundErr("Ресторана с таким id нету");
+    }
+
+    const menuItems = await MenuItem.find({ restaurant: _id });
+
+    res.status(STATUS_OK).send(menuItems);
+  } catch (err) {
+    next(new BadRequestErr(err.message));
+  }
+};
+
+const createMenuItem = async (req, res, next) => {
+  try {
+    const { _id } = req.params;
+    const { name, description, price } = req.body;
+
+    // Проверяем существование ресторана
+    const restaurantExists = await Movie.findById(_id);
+    if (!restaurantExists) {
+      throw new NotFoundErr("Restaurant not found");
+    }
+
+    const menuItem = await MenuItem.create({
+      name,
+      description,
+      price,
+      restaurant: _id,
+    });
+
+    res.status(STATUS_CREATED).send(menuItem);
+  } catch (err) {
+    next(new BadRequestErr(err.message));
+  }
+};
+
+const deleteMenuItem = async (req, res, next) => {
+  try {
+    const { menuItemId } = req.params; // Получаем ID блюда из параметров запроса
+    const userId = req.user.id; // Получаем ID текущего пользователя
+
+    const menuItem = await MenuItem.findById(menuItemId).populate("restaurant"); // Находим блюдо и заполняем информацию о ресторане
+
+    if (!menuItem) {
+      throw new NotFoundErr(ERROR_NOT_FOUND); // Если блюдо не найдено, возвращаем ошибку
+    }
+
+    const { restaurant } = menuItem;
+
+    // Проверяем, что текущий пользователь соответствует владельцу ресторана, к которому принадлежит блюдо
+    if (restaurant.owner.toString() !== userId) {
+      throw new ForbiddenErr(ERROR_NOT_ACCESS); // Если текущий пользователь не является владельцем ресторана, возвращаем ошибку доступа
+    }
+
+    await MenuItem.findByIdAndRemove(menuItemId); // Удаляем блюдо из базы данных
+
+    res.status(STATUS_OK).json(SUCCESS_DEL); // Возвращаем успешный статус и сообщение об удалении
+  } catch (err) {
+    next(err);
+  }
+};
+
+const editMenuItem = async (req, res, next) => {
+  try {
+    const { menuItemId } = req.params; // Получаем ID блюда из параметров запроса
+    const userId = req.user.id; // Получаем ID текущего пользователя
+
+    const updatedFields = req.body; // Обновляемые поля карточки
+
+    const menuItem = await MenuItem.findById(menuItemId).populate("restaurant"); // Находим блюдо и заполняем информацию о ресторане
+
+    if (!menuItem) {
+      throw new NotFoundErr(ERROR_NOT_FOUND); // Если блюдо не найдено, возвращаем ошибку
+    }
+
+    const { restaurant } = menuItem;
+
+    // Проверяем, что текущий пользователь соответствует владельцу ресторана, к которому принадлежит блюдо
+    if (restaurant.owner.toString() !== userId) {
+      throw new ForbiddenErr(ERROR_NOT_ACCESS); // Если текущий пользователь не является владельцем ресторана, возвращаем ошибку доступа
+    }
+
+    // Обновляем информацию о карточке
+    const updatedMenuItem = await MenuItem.findByIdAndUpdate(
+      menuItemId,
+      updatedFields,
+      { new: true }
+    );
+
+    res.status(STATUS_OK).json(updatedMenuItem); // Возвращаем обновленную карточку
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getMovies,
   createMovie,
   deleteMovie,
+  getRestaurantMenuItems,
+  createMenuItem,
+  deleteMenuItem,
+  editMenuItem,
 };

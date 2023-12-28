@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const validator = require('validator');
+const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,6 +21,26 @@ const userSchema = new mongoose.Schema({
     required: true,
     select: false,
   },
+  role: {
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
+  orders: [
+    {
+      // Копия информации о заказе
+      items: [{ type: mongoose.Schema.Types.ObjectId, ref: "MenuItem" }],
+      dateTime: {
+        type: Date,
+        required: true,
+      },
+      totalAmount: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
+  // Дополнительные поля, если необходимо
 });
 
-module.exports = mongoose.model('user', userSchema);
+module.exports = mongoose.model("User", userSchema);

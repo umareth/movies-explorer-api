@@ -25,25 +25,13 @@ const validateUser = celebrate({
 
 const validateCreateMovie = celebrate({
   body: Joi.object().keys({
-    country: Joi.string().required(),
-    director: Joi.string().required(),
-    duration: Joi.number().required(),
-    year: Joi.string().required(),
+    name: Joi.string().required(),
+    address: Joi.string().required(),
+    work_time: Joi.string().required(),
     description: Joi.string().required(),
     image: Joi.string()
       .required()
       .regex(/^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/),
-    trailerLink: Joi.string()
-      .required()
-      .regex(
-        /^(https?:\/\/)?[^\s]*\.(mp4|avi|mov|mkv|flv|wmv|3gp|youtube\.com|youtu\.be)/
-      ),
-    thumbnail: Joi.string()
-      .required()
-      .regex(/^(https?:\/\/)?[^\s]*\.(jpg|jpeg|png|gif|bmp|test)$/),
-    movieId: Joi.number().required(),
-    nameRU: Joi.string().required(),
-    nameEN: Joi.string().required(),
   }),
 });
 
