@@ -1,6 +1,6 @@
 const {
   PORT = 3000,
-  MONGO = "mongodb://127.0.0.1:27017/bitfilmsdb",
+  MONGO = "mongodb://127.0.0.1:27017/restbd",
   JWT_SECRET = "some-secret-key",
   NODE_ENV,
 } = process.env;
